@@ -1,0 +1,28 @@
+[project]
+name = "projeto-integrador"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "htmx>=0.0.0",
+    "jupyterlab>=4.2.5",
+    "pandas>=2.2.3",
+    "sqlalchemy>=2.0.36",
+    "tqdm>=4.66.5",
+]
+
+[tool.ruff.lint]
+preview = true
+select = ["I", "F", "E", "W", "N", "PL", "PT", "ANN", "Q", "ARG", "PD", "NPY", "FAST", "RUF", "PERF"]
+ignore = ["PLR0913", "PLR0917", "PD901"]
+
+[tool.ruff.format]
+preview = true
+quote-style = "double"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 120
