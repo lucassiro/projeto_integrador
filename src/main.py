@@ -1,63 +1,71 @@
+import pandas as pd
 from rich.console import Console
 from rich.progress import track
 from rich.table import Table
+from rich.traceback import install
 
-from api import CamaraAPI
 from db import Deputados, Despesas, Fornecedores, Session
 
-console = Console()
-api = CamaraAPI()
-deputados = api.get_deputados()
+install(show_locals=True)
 
 
 def main() -> None:
+    console = Console()
+
+    df = pd.read_csv("src/data/Ano-2022.csv", sep=";")
+    for column in df.columns:
+        if df[column].dtype == "int64" or df[column].dtype == "float64":
+            df[column] = df[column].fillna(0)
+        elif df[column].dtype == "object":
+            df[column] = df[column].fillna("")
+
     with Session() as session:
         console.print("Inserindo registros no banco de dados...")
-
-        # Deputados
-        for deputado in track(deputados["dados"], description=""):
+        for row in track(df.itertuples(), total=len(df)):
+            # Deputados
             deputado_obj = Deputados(
-                id=deputado["id"],
-                nome=deputado["nome"],
-                sigla_partido=deputado["siglaPartido"],
-                email=deputado["email"],
+                id=row.ideCadastro,
+                nome=row.txNomeParlamentar,
+                cpf=row.cpf,
+                uf=row.sgUF,
+                sigla_partido=row.sgPartido,
+                cod_legislatura=row.codLegislatura,
             )
             existing_deputado = session.query(Deputados).filter_by(id=deputado_obj.id).first()
             if not existing_deputado:
                 session.add(deputado_obj)
 
             # Despesas
-            despesas = api.get_despesas(id=deputado["id"], year=2022)
-            for despesa in despesas["dados"]:
-                despesa_obj = Despesas(
-                    id_deputado=deputado_obj.id,
-                    ano=despesa["ano"],
-                    cnpj_cpf_fornecedor=despesa["cnpjCpfFornecedor"],
-                    cod_documento=despesa["codDocumento"],
-                    cod_lote=despesa["codLote"],
-                    cod_tipo_documento=despesa["codTipoDocumento"],
-                    data_documento=despesa["dataDocumento"],
-                    mes=despesa["mes"],
-                    num_documento=despesa["numDocumento"],
-                    num_ressarcimento=despesa["numRessarcimento"],
-                    parcela=despesa["parcela"],
-                    tipo_despesa=despesa["tipoDespesa"],
-                    tipo_documento=despesa["tipoDocumento"],
-                    url_documento=despesa["urlDocumento"],
-                    valor_documento=despesa["valorDocumento"],
-                    valor_glosa=despesa["valorGlosa"],
-                    valor_liquido=despesa["valorLiquido"],
-                )
-                session.add(despesa_obj)
+            despesa_obj = Despesas(
+                id_deputado=row.ideCadastro,
+                mes=row.numMes,
+                num_mes=row.numMes,
+                ano=row.numAno,
+                descricao=row.txtDescricao,
+                descricao_especificacao=row.txtDescricaoEspecificacao,
+                num_sub_cota=row.numSubCota,
+                cnpj_cpf_fornecedor=row.txtCNPJCPF,
+                data_emissao=row.datEmissao,
+                valor_documento=row.vlrDocumento,
+                valor_glosa=row.vlrGlosa,
+                valor_liquido=row.vlrLiquido,
+                txt_passageiro=row.txtPassageiro,
+                txt_trecho=row.txtTrecho,
+                num_lote=row.numLote,
+                num_ressarcimento=row.numRessarcimento,
+                dat_pagamento_restituicao=row.datPagamentoRestituicao,
+                vlr_restituicao=row.vlrRestituicao,
+                nu_deputado_id=row.nuDeputadoId,
+                ide_documento=row.ideDocumento,
+                url_documento=row.urlDocumento,
+            )
+            session.add(despesa_obj)
 
-                # Fornecedores
-                fornecedor_obj = Fornecedores(
-                    cnpj_cpf=despesa["cnpjCpfFornecedor"],
-                    nome=despesa["nomeFornecedor"],
-                )
-                existing_fornecedor = session.query(Fornecedores).filter_by(cnpj_cpf=fornecedor_obj.cnpj_cpf).first()
-                if not existing_fornecedor:
-                    session.add(fornecedor_obj)
+            # Fornecedores
+            fornecedor_obj = Fornecedores(cnpj_cpf=row.txtCNPJCPF, nome=row.txtFornecedor, numero=row.txtNumero)
+            existing_fornecedor = session.query(Fornecedores).filter_by(cnpj_cpf=fornecedor_obj.cnpj_cpf).first()
+            if not existing_fornecedor:
+                session.add(fornecedor_obj)
 
         session.commit()
 

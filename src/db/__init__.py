@@ -20,40 +20,47 @@ class Deputados(Base):
     __tablename__ = "deputados"
     id = Column(Integer, primary_key=True)
     nome = Column(String)
+    cpf = Column(String)
+    uf = Column(String)
     sigla_partido = Column(String)
-    email = Column(String)
+    cod_legislatura = Column(Integer)
 
 
 class Despesas(Base):
     __tablename__ = "despesas"
     id = Column(Integer, primary_key=True)
     id_deputado = Column(Integer)
-    ano = Column(Integer)
-    cnpj_cpf_fornecedor = Column(String)
-    cod_documento = Column(String)
-    cod_lote = Column(String)
-    cod_tipo_documento = Column(String)
-    data_documento = Column(String)
     mes = Column(Integer)
-    num_documento = Column(String)
-    num_ressarcimento = Column(String)
-    parcela = Column(String)
-    tipo_despesa = Column(String)
-    tipo_documento = Column(String)
-    url_documento = Column(String)
+    num_mes = Column(Integer)
+    ano = Column(Integer)
+    descricao = Column(String)
+    descricao_especificacao = Column(String)
+    num_sub_cota = Column(Integer)
+    cnpj_cpf_fornecedor = Column(String)
+    data_emissao = Column(String)
     valor_documento = Column(Float)
     valor_glosa = Column(Float)
     valor_liquido = Column(Float)
+    txt_passageiro = Column(String)
+    txt_trecho = Column(String)
+    num_lote = Column(Integer)
+    num_ressarcimento = Column(String)
+    dat_pagamento_restituicao = Column(String)
+    vlr_restituicao = Column(Float)
+    nu_deputado_id = Column(Integer)
+    ide_documento = Column(Integer)
+    url_documento = Column(String)
 
 
 class Fornecedores(Base):
     __tablename__ = "fornecedores"
     cnpj_cpf = Column(String, primary_key=True)
     nome = Column(String)
+    numero = Column(String)
 
 
 # Drop tables if they exist
-# Base.metadata.drop_all(engine)
+Base.metadata.drop_all(engine)
 
 # Create the tables in the database
 Base.metadata.create_all(engine)
